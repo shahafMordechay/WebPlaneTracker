@@ -1,0 +1,54 @@
+﻿@{
+    Layout = null;
+    var latitude = ViewBag.latitude;
+    var longitude = ViewBag.longitude;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Plane Location</title>
+</head>
+<style>
+    html {
+        height: 100%;
+    }
+    body {
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+    }
+    .map {  
+        height: 100%;
+        width: 100%;
+    }
+    .marker {
+        position: absolute;
+        height: 15px;
+        width: 15px;
+    }
+    .app-container {
+        height: 100%;
+        position: relative;
+    }
+</style>
+    <body>
+        <div class="app-container">
+            <img src="~/Images/export-map-share.png" class="map" />
+            <img src="~/Images/marker.png" class="marker"/>
+         </div>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script>
+            function map(value, max, min) {
+                return (100 *((value + max) / (max - min)));
+            }
+            var lat = map(@latitude, 90, -90);
+            var lon = map(@longitude, 180, -180);
+            var xPos = lon + '%';
+            var yPos = lat + '%';
+            var marker = document.querySelector('.marker');
+            marker.style.top = yPos;
+            marker.style.left = xPos;
+        </script>
+    @RenderBody()
+    </body>
+</html>

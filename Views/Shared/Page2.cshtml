@@ -1,0 +1,100 @@
+﻿@{
+    ViewBag.Title = "Refresh";
+    Layout = null;
+    var interval = ViewBag.interval;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Plane moving</title>
+</head>
+<style>
+    html {
+        height: 100%;
+    }
+
+    body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+    }
+
+    .map {
+        height: 100%;
+        width: 100%;
+        z-index: 3;
+    }
+
+    .marker {
+        position: absolute;
+        height: 15px;
+        width: 15px;
+        z-index: 2;
+    }
+
+    .app-container {
+        height: 100%;
+        position: relative;
+    }
+
+    .distance {
+        top: 0;
+        position: absolute;
+        z-index: 1;
+    }
+</style>
+<body>
+    <div class="app-container">
+        <img src="~/Images/export-map-share.png" class="map" />
+        <img src="~/Images/marker.png" class="marker" />
+        <canvas class="distance" width="2000" height="1500" style="border:2px solid #d3d3d3;" id="way"></canvas>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+            integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+            crossorigin="anonymous"></script>
+    <script>
+            function setLocation(value, max, min) {
+                return (100 *((value + max) / (max - min)));
+        }
+            function positionMarker(lon, lat) {
+                var latitude = setLocation(lat, 90, -90);
+                var longitude = setLocation(lon, 180, -180);
+                var xPos = longitude + '%';
+                var yPos = latitude + '%';
+                marker.style.top = yPos;
+                marker.style.left = xPos;
+
+        }
+        function getPosition() {
+            $.post('@Url.Action("Position")').done(function (response) {
+                var position = JSON.parse(response);
+                var newx = (setLocation(position.longi, 180, -180) / 100) * window.innerWidth;
+                var newy = (setLocation(position.lati, 90, -90) / 100) * window.innerHeight;
+                positionMarker(position.longi, position.lati);
+                if (lastPos) {
+                    var lastX = (setLocation(lastPos.longi, 180, -180) / 100) * window.innerWidth;
+                    var lastY = (setLocation(lastPos.lati, 90, -90) / 100) * window.innerHeight;
+                    console.log(lastX, lastY, newx, newy);
+                    airplanePath.beginPath();
+                    airplanePath.moveTo(lastX, lastY);
+                    airplanePath.lineTo(newx, newy);
+                    airplanePath.stroke();
+                }
+                lastPos = position;
+            });
+        }
+        var marker = document.querySelector('.marker');
+        var lastPos;
+        var airplanePath = document.getElementById('way').getContext('2d');
+        document.getElementById('way').height = window.innerHeight;
+        document.getElementById('way').width = window.innerWidth;
+        // check.
+        console.log(airplanePath);
+        getPosition();
+        setInterval(getPosition,@interval);
+    </script>
+    @RenderBody()
+</body>
+</html>
